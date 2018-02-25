@@ -1,17 +1,24 @@
 import Base from './components/Base.jsx';
 import HomePage from './components/HomePage.jsx';
+import DashboardPage from './containers/DashboardPage.jsx';
 import LoginPage from './containers/LoginPage.jsx';
 import SignUpPage from './containers/SignUpPage.jsx';
-
+import Auth from './modules/Auth';
 
 const routes = {
-  // base component (wrapper for the whole application).
+
   component: Base,
   childRoutes: [
 
     {
       path: '/',
-      component: HomePage
+      getComponent: (location, cb) => {
+        if (Auth.isUserAuthenticated()) {
+          cb(null, DashboardPage);
+        } else {
+          cb(null, HomePage);
+        }
+      }
     },
 
     {
@@ -22,6 +29,14 @@ const routes = {
     {
       path: '/signup',
       component: SignUpPage
+    },
+
+    {
+      path: 'logout',
+      onEnter: (nextState, replace) => {
+        Auth.deauthenticateUser();
+        replace('/');
+      }
     }
 
   ]

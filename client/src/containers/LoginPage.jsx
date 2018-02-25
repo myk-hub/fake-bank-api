@@ -1,14 +1,24 @@
 import React, { PropTypes } from 'react';
+import Auth from '../modules/Auth';
 import LoginForm from '../components/LoginForm.jsx';
 
 
 class LoginPage extends React.Component {
 
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+
+    const storedMessage = localStorage.getItem('successMessage');
+    let successMessage = '';
+
+    if (storedMessage) {
+      successMessage = storedMessage;
+      localStorage.removeItem('successMessage');
+    }
 
     this.state = {
       errors: {},
+      successMessage,
       user: {
         email: '',
         password: ''
@@ -20,7 +30,6 @@ class LoginPage extends React.Component {
   }
 
   processForm(event) {
-
     event.preventDefault();
 
     const email = encodeURIComponent(this.state.user.email);
@@ -37,18 +46,20 @@ class LoginPage extends React.Component {
           errors: {}
         });
 
-        console.log('The form is valid.');
+        Auth.authenticateUser(xhr.response.token);
+
+        this.context.router.replace('/');
       } else {
+
         const errors = xhr.response.errors ? xhr.response.errors : {};
         errors.summary = xhr.response.message;
 
         this.setState({
           errors
         });
-
       }
     });
-    xhr.send(formData)
+    xhr.send(formData);
   }
 
   changeUser(event) {
@@ -67,11 +78,16 @@ class LoginPage extends React.Component {
         onSubmit={this.processForm}
         onChange={this.changeUser}
         errors={this.state.errors}
+        successMessage={this.state.successMessage}
         user={this.state.user}
       />
     );
   }
 
 }
+
+LoginPage.contextTypes = {
+  router: PropTypes.object.isRequired
+};
 
 export default LoginPage;

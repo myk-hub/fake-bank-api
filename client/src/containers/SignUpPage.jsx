@@ -18,16 +18,6 @@ class SignUpPage extends React.Component {
     this.changeUser = this.changeUser.bind(this);
   }
 
-  changeUser(event) {
-    const field = event.target.name;
-    const user = this.state.user;
-    user[field] = event.target.value;
-
-    this.setState({
-      user
-    });
-  }
-
   processForm(event) {
     event.preventDefault();
 
@@ -46,7 +36,8 @@ class SignUpPage extends React.Component {
           errors: {}
         });
 
-        console.log('The form is valid.');
+        localStorage.setItem('successMessage', xhr.response.message);
+        this.context.router.replace('/login');
       } else {
         const errors = xhr.response.errors ? xhr.response.errors : {};
         errors.summary = xhr.response.message;
@@ -57,6 +48,16 @@ class SignUpPage extends React.Component {
       }
     });
     xhr.send(formData);
+  }
+
+  changeUser(event) {
+    const field = event.target.name;
+    const user = this.state.user;
+    user[field] = event.target.value;
+
+    this.setState({
+      user
+    });
   }
 
   render() {
@@ -72,5 +73,8 @@ class SignUpPage extends React.Component {
 
 }
 
+SignUpPage.contextTypes = {
+  router: PropTypes.object.isRequired
+};
 
 export default SignUpPage;
